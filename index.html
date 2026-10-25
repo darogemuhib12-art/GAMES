@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Our Little Universe — Muheeb & Sara</title>
+  <meta name="theme-color" content="#070714">
+  <meta name="description" content="Two places. Two hearts. One little universe. Made with love for Sara's Birthday.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS Client v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Canvas Confetti CDN for Birthday Finale -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070714;
+      --bg-card: rgba(22, 22, 44, 0.75);
+      --bg-glass: rgba(255, 255, 255, 0.05);
+      --border-glass: rgba(255, 255, 255, 0.12);
+      --primary: #8b5cf6;
+      --primary-light: #a78bfa;
+      --accent-pink: #ec4899;
+      --accent-cyan: #06b6d4;
+      --accent-gold: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-serif: 'Playfair Display', serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: calc(env(safe-area-inset-top, 16px) + 8px) 16px calc(env(safe-area-inset-bottom, 16px) + 16px) 16px;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      flex: 1;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+      padding: 12px 24px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: white;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent-pink) 100%);
+      box-shadow: 0 4px 18px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+    }
+
+    .btn-cyan {
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--primary) 100%);
+      box-shadow: 0 4px 18px rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(10, 10, 25, 0.6);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      color: white;
+      font-size: 0.95rem;
+      outline: none;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary-light);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 16px;
+    }
+
+    .player-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    .status-dot.online {
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .audio-toggle {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.25rem;
+      padding: 6px;
+    }
+
+    h1, h2, h3 {
+      font-family: var(--font-body);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    #screen-intro {
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+    }
+
+    .intro-story {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin: 24px 0;
+      min-height: 60px;
+      transition: opacity 0.6s ease;
+    }
+
+    .couple-title {
+      font-size: 2.2rem;
+      margin: 16px 0 8px;
+      background: linear-gradient(135deg, #fff 0%, var(--primary-light) 50%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .lobby-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .universe-stat-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .stat-pill .num {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+    }
+
+    .stat-pill .lbl {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .portals-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding-bottom: 24px;
+    }
+
+    .portal-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .portal-card:active {
+      transform: scale(0.98);
+      background: rgba(35, 35, 65, 0.85);
+    }
+
+    .portal-card.completed {
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .portal-info h3 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .portal-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .canvas-container {
+      width: 100%;
+      height: 360px;
+      background: #0d0d21;
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    canvas.game-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .touch-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .touch-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: white;
+      touch-action: manipulation;
+    }
+
+    .touch-btn:active {
+      background: var(--primary);
+    }
+
+    #screen-finale {
+      text-align: center;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .finale-constellation {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--accent-pink);
+      text-shadow: 0 0 20px rgba(236, 72, 153, 0.8);
+      margin: 16px 0;
+      letter-spacing: 0.05em;
+    }
+
+    .letter-modal {
+      background: rgba(15, 15, 35, 0.95);
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 24px 18px;
+      margin-top: 16px;
+      text-align: left;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #e2e8f0;
+      max-height: 55vh;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .hidden { display: none !important; }
+    .badge {
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.1);
+      font-weight: 700;
+    }
+    .badge-gold { background: var(--accent-gold); color: black; }
+    .badge-green { background: var(--success); color: white; }
+  </style>
+</head>
+<body>
+
+  <!-- Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="app-container">
+    
+    <!-- Top Persistent Status Bar -->
+    <header class="top-bar">
+      <div class="player-chip">
+        <div id="self-indicator" class="status-dot"></div>
+        <span id="self-name">Exploring...</span>
+      </div>
+      <div class="player-chip">
+        <div id="partner-indicator" class="status-dot"></div>
+        <span id="partner-name">Partner (Offline)</span>
+      </div>
+      <button id="btn-audio-toggle" class="audio-toggle" aria-label="Toggle Sound">🔊</button>
+    </header>
+
+    <!-- SCREEN 1: INTRO -->
+    <section id="screen-intro" class="screen active">
+      <div style="font-size: 3rem; margin-bottom: 8px;">✨</div>
+      <p id="intro-narrative" class="intro-story">Somewhere between Mumbai and Rajpuri, Murud...</p>
+      <h1 class="couple-title">MUHEEB ♡ SARA</h1>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 32px;">
+        "Two places. Two hearts. One little universe."
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+        <button id="btn-intro-enter" class="btn btn-primary">ENTER OUR UNIVERSE</button>
+        <button id="btn-intro-skip" class="btn btn-secondary btn-sm">Skip Cinematic</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: AUTHENTICATION -->
+    <section id="screen-auth" class="screen">
+      <div class="glass-card" style="margin: auto 0;">
+        <h2 style="margin-bottom: 8px; text-align: center;">Universe Keyhole</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; margin-bottom: 20px;">
+          Private entrance for Muheeb & Sara
+        </p>
+        <form id="auth-form" onsubmit="return false;">
+          <input type="email" id="auth-email" class="input-field" placeholder="Your Universe Email" autocomplete="email" required>
+          <input type="password" id="auth-password" class="input-field" placeholder="Secret Passphrase" autocomplete="current-password" required>
+          <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button type="button" id="btn-select-muheeb" class="btn btn-secondary btn-sm" style="flex: 1;">I am Muheeb (Mumbai)</button>
+            <button type="button" id="btn-select-sara" class="btn btn-secondary btn-sm" style="flex: 1;">I am Sara (Rajpuri)</button>
+          </div>
+          <button type="button" id="btn-login" class="btn btn-primary" style="width: 100%;">UNSEAL UNIVERSE</button>
+          <div id="auth-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 10px; text-align: center;"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: WAITING ROOM -->
+    <section id="screen-waiting" class="screen">
+      <div class="glass-card" style="text-align: center; margin: auto 0; padding: 32px 20px;">
+        <div style="font-size: 2.8rem; margin-bottom: 12px;">🌊🌌</div>
+        <h2>Awaiting Your Human...</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin: 12px 0 24px;">
+          Waiting for your favorite person from across the coast to step into the room.
+        </p>
+        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md); font-family: monospace; font-size: 0.85rem; margin-bottom: 20px;">
+          COUPLE ROOM: <span id="display-room-code" style="color: var(--accent-cyan); font-weight: bold;">UNIVERSE-M-S</span>
+        </div>
+        <button id="btn-copy-invite" class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">📋 Copy Invitation Link</button>
+        <button id="btn-force-enter" class="btn btn-cyan btn-sm" style="width: 100%;">Solo Orbit Mode (Preview)</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: LOBBY -->
+    <section id="screen-lobby" class="screen">
+      <div class="lobby-header">
+        <h2 style="font-size: 1.4rem;">Our Shared Constellation</h2>
+        <p style="font-size: 0.78rem; color: var(--text-muted);">Re-ignite all 8 star relics to unlock Sara's Birthday Finale</p>
+      </div>
+
+      <div class="universe-stat-bar">
+        <div class="stat-pill">
+          <div class="num" id="stat-combined-score">0</div>
+          <div class="lbl">Cosmic Score</div>
+        </div>
+        <div class="stat-pill">
+          <div class="num" id="stat-stars-collected">0/8</div>
+          <div class="lbl">Star Relics</div>
+        </div>
+        <div class="stat-pill">
+          <div class="num" id="stat-current-streak">0</div>
+          <div class="lbl">Win Streak</div>
+        </div>
+      </div>
+
+      <div id="activity-ticker" style="font-size: 0.75rem; color: var(--accent-pink); margin-bottom: 12px; text-align: center; min-height: 18px;">
+        ✦ Universe linked between Mumbai and Rajpuri, Murud Janjira.
+      </div>
+
+      <div class="portals-grid" id="portals-container"></div>
+
+      <div style="margin-top: auto; padding-top: 10px;">
+        <button id="btn-view-scoreboard" class="btn btn-secondary" style="width: 100%; font-size: 0.85rem;">🏆 View Shared Chronicles & Scores</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 5: GAME SHELL -->
+    <section id="screen-game" class="screen">
+      <div class="game-header">
+        <div>
+          <button id="btn-exit-game" class="btn btn-secondary btn-sm">✕ Exit</button>
+          <span id="active-game-title" style="font-weight: 700; margin-left: 8px; font-size: 0.95rem;">Game</span>
+        </div>
+        <div id="game-live-score" class="badge badge-gold">Score: 0</div>
+      </div>
+
+      <div id="game-instructions" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;"></div>
+
+      <div id="canvas-wrapper" class="canvas-container">
+        <canvas id="main-game-canvas"></canvas>
+      </div>
+
+      <div id="game-dom-area" class="glass-card" style="display: none; flex: 1; margin-top: 10px; overflow-y: auto;"></div>
+
+      <div id="game-touch-controls" class="touch-controls">
+        <button class="touch-btn" id="ctrl-left" aria-label="Left">◀</button>
+        <button class="touch-btn" id="ctrl-action" aria-label="Action">✦</button>
+        <button class="touch-btn" id="ctrl-right" aria-label="Right">▶</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 6: SCOREBOARD -->
+    <section id="screen-scoreboard" class="screen">
+      <div class="game-header">
+        <h2>Chronicles of Us</h2>
+        <button id="btn-close-scoreboard" class="btn btn-secondary btn-sm">✕ Close</button>
+      </div>
+
+      <div class="glass-card" style="margin-bottom: 12px;">
+        <h3 style="font-size: 0.9rem; margin-bottom: 8px; color: var(--accent-cyan);">Couple Connection</h3>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <span>Muheeb (Mumbai): <b id="score-muheeb">0</b></span>
+          <span>Sara (Rajpuri): <b id="score-sara">0</b></span>
+        </div>
+      </div>
+
+      <h3 style="font-size: 0.9rem; margin-bottom: 8px;">Cosmic Badges</h3>
+      <div id="achievements-list" style="display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto;"></div>
+    </section>
+
+    <!-- SCREEN 7: SARA'S BIRTHDAY FINALE -->
+    <section id="screen-finale" class="screen">
+      <div style="font-size: 3rem; margin-bottom: 6px;">🎂✨</div>
+      <div class="finale-constellation">HAPPY BIRTHDAY, SARA!</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+        All 8 cosmic star relics have united from Mumbai to Rajpuri.
+      </p>
+
+      <button id="btn-reveal-letter" class="btn btn-primary" style="width: 100%; margin-bottom: 12px;">
+        💌 OPEN YOUR LAST LITTLE SURPRISE
+      </button>
+
+      <div id="secret-letter-box" class="letter-modal hidden">
+        <p id="birthday-letter-content"></p>
+        <div style="text-align: right; margin-top: 16px; font-weight: 700; color: var(--accent-pink);">
+          — Muheeb ♡
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button id="btn-return-lobby" class="btn btn-secondary btn-sm">Revisit Our Universe</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. SUPABASE CONFIGURATION
+    // =========================================================================
+const SUPABASE_CONFIG = {
+      URL: 'https://dsfiumscllwjtpjzuyty.supabase.co',
+      ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzZml1bXNjbGx3anRwanp1eXR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NDUyOTksImV4cCI6MjEwODUyMTI5OX0.TQMR8GqUpc5XwanJ-sFepwNfZSD7dH_IM53QWbDRRsM'
+    };
+
+    // Global Client State
+    const STATE = {
+      user: null,
+      playerKey: null,      // 'muheeb' or 'sara'
+      partnerKey: null,     // 'sara' or 'muheeb'
+      partnerOnline: false,
+      roomCode: 'UNIVERSE-M-S',
+      roomId: null,
+      starsCollected: 0,
+      activeGame: null,
+      soundMuted: false,
+      scores: { muheeb: 0, sara: 0, combined: 0 },
+      completedGames: new Set(),
+      realtimeChannel: null
+    };
+
+    // Personalized Birthday Letter for Sara (Editable)
+    const BIRTHDAY_LETTER = `Sara,
+
+If there is one universe I would choose to visit again and again, it would always be the little universe where I get to laugh with you, compete with you, annoy you, and make memories with you.
+
+Today, I didn't just want to send an ordinary message. I wanted to build a little sanctuary where we could stand side-by-side, even across the distance from Mumbai to Rajpuri.
+
+Every star we collected, every puzzle we solved, and every chaotic moment we survived today is a reflection of how effortless and magical being with you really is.
+
+Happy Birthday, Sara. This little universe is yours forever, and the greatest gift of my life is getting to share it with you.
+
+With all my love,
+Muheeb ♡`;
+
+    // 8 Games List
+    const GAMES_CATALOG = [
+      { id: 'chaos', name: 'Chaos Courier', genre: 'Co-op Navigation', desc: 'Steer the cosmic courier across the stormy tides.' },
+      { id: 'mindmelt', name: 'Mind-Melt', genre: 'Psychic Sync', desc: 'Answer unpredictable couple dilemmas simultaneously.' },
+      { id: 'orbital', name: 'Orbital Duel', genre: 'Arcade Arena', desc: 'Precision dash and star-snatching duel.' },
+      { id: 'blueprint', name: 'The Invisible Blueprint', genre: 'Asymmetric Puzzle', desc: 'One sees the matrix, the other builds it.' },
+      { id: 'panic', name: 'Panic Button Orchestra', genre: 'Rhythm Sync', desc: 'Trigger frantic synchronized audio-visual cues.' },
+      { id: 'timethief', name: 'The Time-Thief Heist', genre: 'Escape Room', desc: 'Combine two halves of ciphers to recover time.' },
+      { id: 'pixelheart', name: 'Pixel Heart Heist', genre: 'Memory Duel', desc: 'Match constellation gems in high-speed rounds.' },
+      { id: 'laststar', name: 'The Last Star', genre: 'Boss Finale', desc: 'Dual-beam cooperative battle to re-ignite Sara\'s star.' }
+    ];
+
+    // =========================================================================
+    // 2. SYNTHESIZED SOUND ENGINE (ZERO AUDIO ASSETS NEEDED)
+    // =========================================================================
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      play(type) {
+        if (STATE.soundMuted) return;
+        this.init();
+        if (!this.ctx) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        if (type === 'click') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, t);
+          gain.gain.setValueAtTime(0.08, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+          osc.start(t);
+          osc.stop(t + 0.08);
+        } else if (type === 'match' || type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, t);
+          osc.frequency.exponentialRampToValueAtTime(659.25, t + 0.1);
+          osc.frequency.exponentialRampToValueAtTime(783.99, t + 0.2);
+          gain.gain.setValueAtTime(0.12, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+          osc.start(t);
+          osc.stop(t + 0.35);
+        } else if (type === 'hit' || type === 'fail') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, t);
+          osc.frequency.exponentialRampToValueAtTime(60, t + 0.2);
+          gain.gain.setValueAtTime(0.15, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+          osc.start(t);
+          osc.stop(t + 0.25);
+        } else if (type === 'celestial') {
+          [261.63, 329.63, 392.00, 523.25].forEach((freq, idx) => {
+            const o = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            o.type = 'sine';
+            o.frequency.setValueAtTime(freq, t);
+            g.gain.setValueAtTime(0.04, t);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2 + idx * 0.2);
+            o.connect(g);
+            g.connect(this.ctx.destination);
+            o.start(t);
+            o.stop(t + 1.5 + idx * 0.2);
+          });
+        }
+      }
+    }
+    const audio = new SoundEngine();
+
+    // =========================================================================
+    // 3. BACKGROUND COSMOS CANVAS
+    // =========================================================================
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let stars = [];
+
+    function resizeBg() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+      stars = Array.from({ length: 65 }, () => ({
+        x: Math.random() * bgCanvas.width,
+        y: Math.random() * bgCanvas.height,
+        r: Math.random() * 1.5 + 0.5,
+        alpha: Math.random(),
+        speed: Math.random() * 0.02 + 0.005
+      }));
+    }
+    window.addEventListener('resize', resizeBg);
+    resizeBg();
+
+    function renderCosmos() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed;
+        const currentAlpha = Math.abs(Math.sin(s.alpha));
+        bgCtx.fillStyle = `rgba(255, 255, 255, ${currentAlpha * 0.7})`;
+        bgCtx.beginPath();
+        bgCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        bgCtx.fill();
+      });
+      requestAnimationFrame(renderCosmos);
+    }
+    renderCosmos();
+
+    // =========================================================================
+    // 4. SUPABASE & NETWORK LAYER
+    // =========================================================================
+    let supabaseClient = null;
+    const isMockMode = (SUPABASE_CONFIG.URL.includes('YOUR_PROJECT_ID') || SUPABASE_CONFIG.ANON_KEY.includes('PASTE_YOUR'));
+
+    if (!isMockMode) {
+      supabaseClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+    }
+
+    function setupRealtimeListeners() {
+      if (isMockMode || !supabaseClient) return;
+
+      const channel = supabaseClient.channel(`room:${STATE.roomCode}`, {
+        config: { presence: { key: STATE.playerKey } }
+      });
+
+      channel
+        .on('presence', { event: 'sync' }, () => {
+          const presenceState = channel.presenceState();
+          const keys = Object.keys(presenceState);
+          STATE.partnerOnline = keys.includes(STATE.partnerKey);
+          updatePartnerStatusUI();
+        })
+        .on('broadcast', { event: 'game_event' }, ({ payload }) => {
+          handleIncomingNetworkEvent(payload);
+        })
+        .subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await channel.track({ online_at: new Date().toISOString() });
+          }
+        });
+
+      STATE.realtimeChannel = channel;
+    }
+
+    function sendNetworkEvent(type, payload = {}) {
+      if (STATE.realtimeChannel && !isMockMode) {
+        STATE.realtimeChannel.send({
+          type: 'broadcast',
+          event: 'game_event',
+          payload: { type, sender: STATE.playerKey, ...payload }
+        });
+      }
+    }
+
+    function handleIncomingNetworkEvent(data) {
+      if (data.sender === STATE.playerKey) return;
+      
+      if (data.type === 'START_GAME') {
+        launchGameLocally(data.gameId, false);
+      } else if (data.type === 'MINDMELT_ANSWER') {
+        handleMindMeltPartnerAnswer(data.answer);
+      } else if (data.type === 'ORBITAL_MOVE') {
+        syncOrbitalPartner(data.x, data.y);
+      } else if (data.type === 'CHAOS_UPDATE') {
+        syncChaosPartner(data);
+      } else if (data.type === 'PANIC_PRESS') {
+        audio.play('click');
+      } else if (data.type === 'BLUEPRINT_CELL') {
+        syncBlueprintCell(data.cellIndex);
+      } else if (data.type === 'PIXEL_CARD_FLIP') {
+        syncPixelCardFlip(data.cardIndex);
+      } else if (data.type === 'LAST_STAR_ACTION') {
+        syncLastStarAction(data.action);
+      }
+    }
+
+    function updatePartnerStatusUI() {
+      const partnerDot = document.getElementById('partner-indicator');
+      const partnerText = document.getElementById('partner-name');
+      const partnerCap = STATE.partnerKey === 'sara' ? 'Sara (Rajpuri)' : 'Muheeb (Mumbai)';
+
+      if (STATE.partnerOnline) {
+        partnerDot.classList.add('online');
+        partnerText.textContent = `${partnerCap} • Ready`;
+      } else {
+        partnerDot.classList.remove('online');
+        partnerText.textContent = `${partnerCap} • Disconnected`;
+      }
+    }
+
+    // =========================================================================
+    // 5. INTRO & AUTH FLOW
+    // =========================================================================
+    const narrativeTexts = [
+      "Somewhere between Mumbai and Rajpuri, Murud...",
+      "...across the Arabian sea breeze and winding shores...",
+      "...two people found their own little universe.",
+      "Welcome, Muheeb & Sara."
+    ];
+    let narrativeIdx = 0;
+    const narrativeEl = document.getElementById('intro-narrative');
+
+    const introInterval = setInterval(() => {
+      narrativeIdx++;
+      if (narrativeIdx < narrativeTexts.length) {
+        narrativeEl.style.opacity = '0';
+        setTimeout(() => {
+          narrativeEl.textContent = narrativeTexts[narrativeIdx];
+          narrativeEl.style.opacity = '1';
+        }, 300);
+      } else {
+        clearInterval(introInterval);
+      }
+    }, 2400);
+
+    document.getElementById('btn-intro-enter').addEventListener('click', () => {
+      audio.play('click');
+      clearInterval(introInterval);
+      showScreen('screen-auth');
+    });
+
+    document.getElementById('btn-intro-skip').addEventListener('click', () => {
+      audio.play('click');
+      clearInterval(introInterval);
+      showScreen('screen-auth');
+    });
+
+    document.getElementById('btn-select-muheeb').addEventListener('click', () => {
+      document.getElementById('auth-email').value = 'muheeb@ouruniverse.love';
+      document.getElementById('auth-password').value = 'CosmicMuheeb2026';
+    });
+
+    document.getElementById('btn-select-sara').addEventListener('click', () => {
+      document.getElementById('auth-email').value = 'sara@ouruniverse.love';
+      document.getElementById('auth-password').value = 'CosmicSara2026';
+    });
+
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      audio.play('click');
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const errEl = document.getElementById('auth-error');
+      errEl.textContent = '';
+
+      if (!email.includes('muheeb') && !email.includes('sara')) {
+        errEl.textContent = 'Only Muheeb or Sara are authorized for this universe.';
+        return;
+      }
+
+      if (isMockMode) {
+        STATE.playerKey = email.includes('muheeb') ? 'muheeb' : 'sara';
+        STATE.partnerKey = STATE.playerKey === 'muheeb' ? 'sara' : 'muheeb';
+        postAuthSuccess();
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        STATE.user = data.user;
+        STATE.playerKey = email.includes('muheeb') ? 'muheeb' : 'sara';
+        STATE.partnerKey = STATE.playerKey === 'muheeb' ? 'sara' : 'muheeb';
+        postAuthSuccess();
+      } catch (err) {
+        errEl.textContent = err.message || 'Login failed. Verify credentials in Supabase.';
+      }
+    });
+
+    function postAuthSuccess() {
+      audio.play('celestial');
+      document.getElementById('self-indicator').classList.add('online');
+      document.getElementById('self-name').textContent = STATE.playerKey === 'muheeb' ? 'Muheeb (Mumbai)' : 'Sara (Rajpuri)';
+      updatePartnerStatusUI();
+      setupRealtimeListeners();
+      renderPortals();
+      showScreen('screen-waiting');
+    }
+
+    document.getElementById('btn-copy-invite').addEventListener('click', () => {
+      audio.play('click');
+      navigator.clipboard.writeText(window.location.href);
+      alert('Universe link copied! Send it to Sara.');
+    });
+
+    document.getElementById('btn-force-enter').addEventListener('click', () => {
+      audio.play('click');
+      showScreen('screen-lobby');
+    });
+
+    function renderPortals() {
+      const container = document.getElementById('portals-container');
+      container.innerHTML = '';
+
+      GAMES_CATALOG.forEach((g, idx) => {
+        const isCompleted = STATE.completedGames.has(g.id);
+        const card = document.createElement('div');
+        card.className = `portal-card ${isCompleted ? 'completed' : ''}`;
+        card.innerHTML = `
+          <div class="portal-info">
+            <h3>${idx + 1}. ${g.name} ${isCompleted ? '✦' : ''}</h3>
+            <p>${g.desc}</p>
+          </div>
+          <span class="badge ${isCompleted ? 'badge-green' : 'badge-gold'}">
+            ${isCompleted ? 'REPLAY' : 'ENTER'}
+          </span>
+        `;
+        card.addEventListener('click', () => {
+          audio.play('click');
+          requestStartGame(g.id);
+        });
+        container.appendChild(card);
+      });
+
+      document.getElementById('stat-stars-collected').textContent = `${STATE.completedGames.size}/8`;
+      document.getElementById('stat-combined-score').textContent = STATE.scores.combined;
+    }
+
+    function requestStartGame(gameId) {
+      sendNetworkEvent('START_GAME', { gameId });
+      launchGameLocally(gameId, true);
+    }
+
+    document.getElementById('btn-exit-game').addEventListener('click', () => {
+      audio.play('click');
+      if (activeGameLoop) cancelAnimationFrame(activeGameLoop);
+      showScreen('screen-lobby');
+      renderPortals();
+    });
+
+    document.getElementById('btn-view-scoreboard').addEventListener('click', () => {
+      audio.play('click');
+      document.getElementById('score-muheeb').textContent = STATE.scores.muheeb;
+      document.getElementById('score-sara').textContent = STATE.scores.sara;
+      renderAchievementsList();
+      showScreen('screen-scoreboard');
+    });
+
+    document.getElementById('btn-close-scoreboard').addEventListener('click', () => {
+      audio.play('click');
+      showScreen('screen-lobby');
+    });
+
+    function renderAchievementsList() {
+      const list = document.getElementById('achievements-list');
+      list.innerHTML = '';
+      const achievements = [
+        { title: 'Coastal Connection', desc: 'Linked the universe between Mumbai and Rajpuri.' },
+        { title: 'Chaos Navigators', desc: 'Escorted the courier safely past the Arabian tides.' },
+        { title: 'Telepathy Unlocked', desc: 'Achieved matching sync in Mind-Melt.' },
+        { title: 'Cosmic Duelists', desc: 'Snagged the golden stars in Orbital Duel.' },
+        { title: 'Master Architects', desc: 'Built the Invisible Blueprint together.' },
+        { title: 'Panic Virtuosos', desc: 'Finished the rhythm sequences seamlessly.' },
+        { title: 'Time Heist Masters', desc: 'Decoded the Time-Thief ciphers.' },
+        { title: 'Constellation Reignited', desc: 'Unlocked Sara\'s Birthday constellation.' }
+      ];
+
+      achievements.forEach(a => {
+        const item = document.createElement('div');
+        item.className = 'glass-card';
+        item.style.padding = '12px 14px';
+        item.innerHTML = `
+          <div style="font-weight: 700; font-size: 0.85rem; color: var(--accent-pink);">✦ ${a.title}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${a.desc}</div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    document.getElementById('btn-audio-toggle').addEventListener('click', (e) => {
+      STATE.soundMuted = !STATE.soundMuted;
+      e.target.textContent = STATE.soundMuted ? '🔇' : '🔊';
+    });
+
+    // =========================================================================
+    // 6. EIGHT FULLY PLAYABLE GAMES
+    // =========================================================================
+    let activeGameLoop = null;
+    const gameCanvas = document.getElementById('main-game-canvas');
+    const gctx = gameCanvas.getContext('2d');
+    const domArea = document.getElementById('game-dom-area');
+    const canvasWrapper = document.getElementById('canvas-wrapper');
+
+    function resetGameView(useCanvas = true) {
+      if (activeGameLoop) cancelAnimationFrame(activeGameLoop);
+      if (useCanvas) {
+        canvasWrapper.style.display = 'block';
+        domArea.style.display = 'none';
+        gameCanvas.width = canvasWrapper.clientWidth;
+        gameCanvas.height = canvasWrapper.clientHeight;
+      } else {
+        canvasWrapper.style.display = 'none';
+        domArea.style.display = 'block';
+        domArea.innerHTML = '';
+      }
+    }
+
+    function recordGameSuccess(gameId, points = 100) {
+      audio.play('success');
+      STATE.completedGames.add(gameId);
+      STATE.scores[STATE.playerKey] += points;
+      STATE.scores.combined += points;
+      
+      if (STATE.completedGames.size >= 8) {
+        setTimeout(triggerBirthdayFinale, 1000);
+      } else {
+        alert(`Cosmic Victory! +${points} points added to your shared universe.`);
+        showScreen('screen-lobby');
+        renderPortals();
+      }
+    }
+
+    function launchGameLocally(gameId, isHost) {
+      STATE.activeGame = gameId;
+      const gameDef = GAMES_CATALOG.find(g => g.id === gameId);
+      document.getElementById('active-game-title').textContent = gameDef ? gameDef.name : 'Game';
+      showScreen('screen-game');
+
+      if (gameId === 'chaos') runChaosCourier();
+      else if (gameId === 'mindmelt') runMindMelt();
+      else if (gameId === 'orbital') runOrbitalDuel();
+      else if (gameId === 'blueprint') runInvisibleBlueprint();
+      else if (gameId === 'panic') runPanicOrchestra();
+      else if (gameId === 'timethief') runTimeThief();
+      else if (gameId === 'pixelheart') runPixelHeart();
+      else if (gameId === 'laststar') runTheLastStar();
+    }
+
+    // GAME 1: CHAOS COURIER
+    let chaosShip = { x: 150, y: 180, shield: true, energy: 100 };
+    let chaosAsteroids = [];
+
+    function runChaosCourier() {
+      resetGameView(true);
+      document.getElementById('game-instructions').textContent =
+        STATE.playerKey === 'muheeb' 
+          ? 'MUHEEB: Steer ship left & right using arrows!' 
+          : 'SARA: Toggle cosmic shields to deflect asteroids!';
+
+      chaosShip = { x: gameCanvas.width / 2, y: gameCanvas.height - 60, shield: true, energy: 100 };
+      chaosAsteroids = [];
+
+      for (let i = 0; i < 6; i++) {
+        chaosAsteroids.push({
+          x: Math.random() * (gameCanvas.width - 30) + 15,
+          y: Math.random() * -300,
+          speed: Math.random() * 2 + 1.5,
+          size: 14
+        });
+      }
+
+      document.getElementById('ctrl-left').onclick = () => {
+        if (STATE.playerKey === 'muheeb') {
+          chaosShip.x = Math.max(20, chaosShip.x - 25);
+          sendNetworkEvent('CHAOS_UPDATE', { x: chaosShip.x });
+        }
+      };
+      document.getElementById('ctrl-right').onclick = () => {
+        if (STATE.playerKey === 'muheeb') {
+          chaosShip.x = Math.min(gameCanvas.width - 20, chaosShip.x + 25);
+          sendNetworkEvent('CHAOS_UPDATE', { x: chaosShip.x });
+        }
+      };
+      document.getElementById('ctrl-action').onclick = () => {
+        if (STATE.playerKey === 'sara') {
+          chaosShip.shield = !chaosShip.shield;
+          audio.play('click');
+          sendNetworkEvent('CHAOS_UPDATE', { shield: chaosShip.shield });
+        }
+      };
+
+      let distance = 0;
+      function loop() {
+        gctx.fillStyle = '#0a0a1a';
+        gctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+        chaosAsteroids.forEach(a => {
+          a.y += a.speed;
+          if (a.y > gameCanvas.height) {
+            a.y = -20;
+            a.x = Math.random() * (gameCanvas.width - 30) + 15;
+          }
+
+          const dist = Math.hypot(a.x - chaosShip.x, a.y - chaosShip.y);
+          if (dist < a.size + 15) {
+            if (chaosShip.shield) {
+              audio.play('click');
+              a.y = -30;
+            } else {
+              audio.play('hit');
+              chaosShip.energy -= 15;
+              a.y = -30;
+            }
+          }
+
+          gctx.fillStyle = '#f87171';
+          gctx.beginPath();
+          gctx.arc(a.x, a.y, a.size, 0, Math.PI * 2);
+          gctx.fill();
+        });
+
+        gctx.fillStyle = '#818cf8';
+        gctx.beginPath();
+        gctx.moveTo(chaosShip.x, chaosShip.y - 18);
+        gctx.lineTo(chaosShip.x - 14, chaosShip.y + 14);
+        gctx.lineTo(chaosShip.x + 14, chaosShip.y + 14);
+        gctx.closePath();
+        gctx.fill();
+
+        if (chaosShip.shield) {
+          gctx.strokeStyle = '#38bdf8';
+          gctx.lineWidth = 3;
+          gctx.beginPath();
+          gctx.arc(chaosShip.x, chaosShip.y, 25, 0, Math.PI * 2);
+          gctx.stroke();
+        }
+
+        distance += 0.5;
+        document.getElementById('game-live-score').textContent = `Energy: ${chaosShip.energy}% | Journey: ${Math.floor(distance)}/300m`;
+
+        if (chaosShip.energy <= 0) {
+          alert('Courier took too much damage! Re-aligning orbit...');
+          runChaosCourier();
+          return;
+        }
+
+        if (distance >= 300) {
+          recordGameSuccess('chaos', 150);
+          return;
+        }
+
+        activeGameLoop = requestAnimationFrame(loop);
+      }
+      activeGameLoop = requestAnimationFrame(loop);
+    }
+
+    function syncChaosPartner(data) {
+      if (data.x !== undefined) chaosShip.x = data.x;
+      if (data.shield !== undefined) chaosShip.shield = data.shield;
+    }
+
+    // GAME 2: MIND-MELT
+    const MINDMELT_QUESTIONS = [
+      {
+        q: "If Sara teleports right next to Muheeb in Mumbai this evening, what's our immediate move?",
+        choices: ["Late-night long drive near Marine Drive", "Order a feast of our favorite comfort food", "Walk along the shore talking for hours", "Playfully argue about who missed whom more"]
+      },
+      {
+        q: "Who is more likely to lose track of time while watching reels or funny Disney videos?",
+        choices: ["100% Sara", "100% Muheeb", "Both simultaneously", "Neither, we blame bad network"]
+      },
+      {
+        q: "When we visit the Rajpuri coast together, what's the first fun thing we do?",
+        choices: ["Take aesthetic sunset photos", "Catch the boat towards Janjira Fort", "Eat fresh local snacks by the sea", "Just sit quietly and enjoy the sea breeze"]
+      }
+    ];
+
+    let mindMeltRound = 0;
+    let localAnswer = null;
+    let partnerAnswer = null;
+
+    function runMindMelt() {
+      resetGameView(false);
+      localAnswer = null;
+      partnerAnswer = null;
+      const current = MINDMELT_QUESTIONS[mindMeltRound % MINDMELT_QUESTIONS.length];
+
+      document.getElementById('game-instructions').textContent = 'Make your choice secretly. Answers reveal together!';
+      domArea.innerHTML = `
+        <h3 style="font-size: 1rem; margin-bottom: 16px; color: var(--accent-pink);">${current.q}</h3>
+        <div id="mindmelt-choices" style="display: flex; flex-direction: column; gap: 10px;">
+          ${current.choices.map((c, i) => `
+            <button class="btn btn-secondary" style="text-align: left; justify-content: flex-start; font-size: 0.85rem;" onclick="submitMindMeltChoice(${i})">
+              ${c}
+            </button>
+          `).join('')}
+        </div>
+        <div id="mindmelt-status" style="margin-top: 20px; font-size: 0.85rem; color: var(--text-muted); text-align: center;"></div>
+      `;
+    }
+
+    window.submitMindMeltChoice = function(index) {
+      audio.play('click');
+      localAnswer = index;
+      document.getElementById('mindmelt-choices').style.pointerEvents = 'none';
+      document.getElementById('mindmelt-status').textContent = 'Choice locked! Waiting for partner...';
+      sendNetworkEvent('MINDMELT_ANSWER', { answer: index });
+
+      checkMindMeltResolution();
+    };
+
+    function handleMindMeltPartnerAnswer(ans) {
+      partnerAnswer = ans;
+      checkMindMeltResolution();
+    }
+
+    function checkMindMeltResolution() {
+      if (localAnswer !== null && partnerAnswer !== null) {
+        const isMatch = (localAnswer === partnerAnswer);
+        const statusBox = document.getElementById('mindmelt-status');
+        if (isMatch) {
+          audio.play('match');
+          statusBox.innerHTML = `<span style="color: var(--success); font-weight: bold;">✦ MIND-MELT SUCCESS! Telepathic connection achieved!</span>`;
+          setTimeout(() => {
+            recordGameSuccess('mindmelt', 100);
+          }, 1800);
+        } else {
+          audio.play('hit');
+          statusBox.innerHTML = `<span style="color: var(--accent-gold);">Different wavelengths! Answers revealed: (${localAnswer + 1}) vs (${partnerAnswer + 1}). Re-tuning minds...</span>`;
+          setTimeout(() => {
+            mindMeltRound++;
+            runMindMelt();
+          }, 2400);
+        }
+      }
+    }
+
+    // GAME 3: ORBITAL DUEL
+    let p1 = { x: 50, y: 150, score: 0 };
+    let p2 = { x: 250, y: 150, score: 0 };
+    let arenaStar = { x: 150, y: 150 };
+
+    function runOrbitalDuel() {
+      resetGameView(true);
+      document.getElementById('game-instructions').textContent = 'Use arrows to snatch glowing stars before your partner!';
+      p1 = { x: 50, y: 100, score: 0 };
+      p2 = { x: gameCanvas.width - 50, y: 100, score: 0 };
+      arenaStar = { x: gameCanvas.width / 2, y: gameCanvas.height / 2 };
+
+      document.getElementById('ctrl-left').onclick = () => moveDuelShip(-25, 0);
+      document.getElementById('ctrl-right').onclick = () => moveDuelShip(25, 0);
+      document.getElementById('ctrl-action').onclick = () => moveDuelShip(0, -25);
+
+      function loop() {
+        gctx.fillStyle = '#080816';
+        gctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+        gctx.fillStyle = '#fbbf24';
+        gctx.beginPath();
+        gctx.arc(arenaStar.x, arenaStar.y, 10, 0, Math.PI * 2);
+        gctx.fill();
+
+        gctx.fillStyle = '#38bdf8';
+        gctx.fillRect(p1.x - 10, p1.y - 10, 20, 20);
+
+        gctx.fillStyle = '#f472b6';
+        gctx.fillRect(p2.x - 10, p2.y - 10, 20, 20);
+
+        const selfShip = STATE.playerKey === 'muheeb' ? p1 : p2;
+        if (Math.hypot(selfShip.x - arenaStar.x, selfShip.y - arenaStar.y) < 22) {
+          audio.play('match');
+          selfShip.score += 1;
+          arenaStar.x = Math.random() * (gameCanvas.width - 60) + 30;
+          arenaStar.y = Math.random() * (gameCanvas.height - 60) + 30;
+          sendNetworkEvent('ORBITAL_MOVE', {
+            x: selfShip.x, y: selfShip.y
+          });
+        }
+
+        document.getElementById('game-live-score').textContent = `M: ${p1.score} | S: ${p2.score}`;
+
+        if (p1.score >= 5 || p2.score >= 5) {
+          recordGameSuccess('orbital', 120);
+          return;
+        }
+
+        activeGameLoop = requestAnimationFrame(loop);
+      }
+      activeGameLoop = requestAnimationFrame(loop);
+    }
+
+    function moveDuelShip(dx, dy) {
+      const self = STATE.playerKey === 'muheeb' ? p1 : p2;
+      self.x = Math.max(15, Math.min(gameCanvas.width - 15, self.x + dx));
+      self.y = Math.max(15, Math.min(gameCanvas.height - 15, self.y + dy));
+      sendNetworkEvent('ORBITAL_MOVE', { x: self.x, y: self.y });
+    }
+
+    function syncOrbitalPartner(x, y) {
+      const partner = STATE.playerKey === 'muheeb' ? p2 : p1;
+      partner.x = x;
+      partner.y = y;
+    }
+
+    // GAME 4: THE INVISIBLE BLUEPRINT
+    const blueprintPattern = [0, 2, 4, 6, 8];
+    let playerGrid = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    function runInvisibleBlueprint() {
+      resetGameView(false);
+      playerGrid = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+      const isArchitect = (STATE.playerKey === 'muheeb');
+
+      document.getElementById('game-instructions').textContent = isArchitect
+        ? 'ARCHITECT (Muheeb): You see the secret pattern! Guide Sara on the call/chat.'
+        : 'BUILDER (Sara): Reconstruct the pattern on your grid!';
+
+      domArea.innerHTML = `
+        <div style="text-align: center; margin-bottom: 12px; font-size: 0.85rem; color: var(--accent-cyan);">
+          ${isArchitect ? 'SECRET BLUEPRINT PATTERN' : 'TAP CELLS TO MATCH BLUEPRINT'}
+        </div>
+        <div id="blueprint-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 260px; margin: 0 auto;">
+          ${[0,1,2,3,4,5,6,7,8].map(i => `
+            <div id="bp-cell-${i}" 
+                 style="aspect-ratio: 1; border-radius: var(--radius-md); border: 1px solid var(--border-glass); 
+                        background: ${isArchitect && blueprintPattern.includes(i) ? 'var(--accent-pink)' : 'rgba(255,255,255,0.06)'}; 
+                        display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer;"
+                 onclick="${!isArchitect ? `toggleBlueprintCell(${i})` : ''}">
+            </div>
+          `).join('')}
+        </div>
+        ${!isArchitect ? `
+          <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="verifyBlueprint()">
+            Submit Constructed Matrix
+          </button>
+        ` : `<div style="text-align: center; margin-top: 16px; font-size: 0.75rem; color: var(--text-muted);">Awaiting builder construction...</div>`}
+      `;
+    }
+
+    window.toggleBlueprintCell = function(idx) {
+      audio.play('click');
+      playerGrid[idx] = playerGrid[idx] ? 0 : 1;
+      const el = document.getElementById(`bp-cell-${idx}`);
+      el.style.background = playerGrid[idx] ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.06)';
+      sendNetworkEvent('BLUEPRINT_CELL', { cellIndex: idx });
+    };
+
+    function syncBlueprintCell(idx) {
+      if (STATE.playerKey === 'muheeb') {
+        const el = document.getElementById(`bp-cell-${idx}`);
+        if (el) el.style.border = '2px solid var(--accent-cyan)';
+      }
+    }
+
+    window.verifyBlueprint = function() {
+      const success = blueprintPattern.every(idx => playerGrid[idx] === 1) &&
+                      playerGrid.filter(v => v === 1).length === blueprintPattern.length;
+      if (success) {
+        recordGameSuccess('blueprint', 140);
+      } else {
+        audio.play('fail');
+        alert('The blueprint has misalignments! Consult your architect and retry.');
+      }
+    };
+
+    // GAME 5: PANIC BUTTON ORCHESTRA
+    let panicStep = 0;
+    const panicSequence = [1, 2, 3, 2, 1, 3];
+
+    function runPanicOrchestra() {
+      resetGameView(false);
+      panicStep = 0;
+      document.getElementById('game-instructions').textContent = 'Tap the active frequency keys in sequence!';
+      renderPanicButtons();
+    }
+
+    function renderPanicButtons() {
+      const target = panicSequence[panicStep];
+      domArea.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 0.8rem; color: var(--text-muted);">SEQUENCE STEP ${panicStep + 1} OF ${panicSequence.length}</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--accent-pink); margin-top: 4px;">TARGET KEY: ${target}</div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+          ${[1, 2, 3].map(btn => `
+            <button class="btn btn-secondary" style="min-height: 80px; font-size: 1.5rem; font-weight: 800;" onclick="pressPanicKey(${btn})">
+              ${btn}
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    window.pressPanicKey = function(key) {
+      audio.play('click');
+      if (key === panicSequence[panicStep]) {
+        panicStep++;
+        sendNetworkEvent('PANIC_PRESS', { buttonIndex: key });
+        if (panicStep >= panicSequence.length) {
+          recordGameSuccess('panic', 130);
+        } else {
+          renderPanicButtons();
+        }
+      } else {
+        audio.play('fail');
+        panicStep = 0;
+        alert('Rhythm disrupted! Restarting orchestra.');
+        renderPanicButtons();
+      }
+    };
+
+    // GAME 6: THE TIME-THIEF HEIST
+    function runTimeThief() {
+      resetGameView(false);
+      const isMuheeb = (STATE.playerKey === 'muheeb');
+      document.getElementById('game-instructions').textContent = 'Combine your cipher fragments to unmask the clock code!';
+
+      domArea.innerHTML = `
+        <div style="background: rgba(0,0,0,0.4); padding: 14px; border-radius: var(--radius-md); margin-bottom: 16px;">
+          <h4 style="color: var(--accent-gold); margin-bottom: 6px;">Your Secret Cipher Half:</h4>
+          <p style="font-size: 0.95rem; font-family: monospace;">
+            ${isMuheeb ? 'FRAGMENT A: "FIRST TWO DIGITS ARE [2] [0]"' : 'FRAGMENT B: "LAST TWO DIGITS ARE [2] [6]"'}
+          </p>
+        </div>
+        <input type="text" id="cipher-input" class="input-field" placeholder="Enter full 4-digit code (e.g. 0000)" maxlength="4" style="text-align: center; font-size: 1.2rem; letter-spacing: 0.2em;">
+        <button class="btn btn-primary" style="width: 100%;" onclick="submitTimeThiefCode()">DISARM TIME-THIEF</button>
+      `;
+    }
+
+    window.submitTimeThiefCode = function() {
+      const code = document.getElementById('cipher-input').value.trim();
+      if (code === '2026') {
+        recordGameSuccess('timethief', 150);
+      } else {
+        audio.play('fail');
+        alert('Incorrect time sequence! Communicate with your partner.');
+      }
+    };
+
+    // GAME 7: PIXEL HEART HEIST
+    const cardSymbols = ['🌸', '🌙', '⭐', '💎', '🌸', '🌙', '⭐', '💎'];
+    let flippedIndices = [];
+    let matchedCount = 0;
+
+    function runPixelHeart() {
+      resetGameView(false);
+      flippedIndices = [];
+      matchedCount = 0;
+      document.getElementById('game-instructions').textContent = 'Match all the pairs of cosmic gems together!';
+
+      domArea.innerHTML = `
+        <div id="memory-board" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+          ${cardSymbols.map((sym, i) => `
+            <div id="mem-card-${i}" class="glass-card" 
+                 style="aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; cursor: pointer;"
+                 onclick="flipPixelCard(${i})">
+              ?
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    window.flipPixelCard = function(idx) {
+      if (flippedIndices.length >= 2 || flippedIndices.includes(idx)) return;
+      audio.play('click');
+      const card = document.getElementById(`mem-card-${idx}`);
+      card.textContent = cardSymbols[idx];
+      card.style.borderColor = 'var(--accent-pink)';
+      flippedIndices.push(idx);
+
+      sendNetworkEvent('PIXEL_CARD_FLIP', { cardIndex: idx });
+
+      if (flippedIndices.length === 2) {
+        const [a, b] = flippedIndices;
+        if (cardSymbols[a] === cardSymbols[b]) {
+          audio.play('match');
+          matchedCount += 2;
+          flippedIndices = [];
+          if (matchedCount === cardSymbols.length) {
+            recordGameSuccess('pixelheart', 160);
+          }
+        } else {
+          setTimeout(() => {
+            document.getElementById(`mem-card-${a}`).textContent = '?';
+            document.getElementById(`mem-card-${b}`).textContent = '?';
+            flippedIndices = [];
+          }, 800);
+        }
+      }
+    };
+
+    function syncPixelCardFlip(idx) {
+      const card = document.getElementById(`mem-card-${idx}`);
+      if (card) card.textContent = cardSymbols[idx];
+    }
+
+    // GAME 8: THE LAST STAR
+    let bossHp = 100;
+
+    function runTheLastStar() {
+      resetGameView(true);
+      bossHp = 100;
+      document.getElementById('game-instructions').textContent = 'CO-OP BOSS: Strike together to re-ignite the star of Rajpuri & Mumbai!';
+
+      document.getElementById('ctrl-left').onclick = () => performBossAction('LIGHT');
+      document.getElementById('ctrl-right').onclick = () => performBossAction('HEAL');
+      document.getElementById('ctrl-action').onclick = () => performBossAction('BURST');
+
+      function loop() {
+        gctx.fillStyle = '#060611';
+        gctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+        const pulse = Math.sin(Date.now() / 200) * 10;
+        const grad = gctx.createRadialGradient(
+          gameCanvas.width / 2, 140, 5,
+          gameCanvas.width / 2, 140, 50 + pulse
+        );
+        grad.addColorStop(0, '#f43f5e');
+        grad.addColorStop(1, 'transparent');
+
+        gctx.fillStyle = grad;
+        gctx.beginPath();
+        gctx.arc(gameCanvas.width / 2, 140, 50 + pulse, 0, Math.PI * 2);
+        gctx.fill();
+
+        gctx.fillStyle = 'rgba(255,255,255,0.1)';
+        gctx.fillRect(40, 20, gameCanvas.width - 80, 10);
+        gctx.fillStyle = '#f43f5e';
+        gctx.fillRect(40, 20, (gameCanvas.width - 80) * (bossHp / 100), 10);
+
+        document.getElementById('game-live-score').textContent = `Star Eclipse HP: ${bossHp}%`;
+
+        if (bossHp <= 0) {
+          recordGameSuccess('laststar', 250);
+          return;
+        }
+
+        activeGameLoop = requestAnimationFrame(loop);
+      }
+      activeGameLoop = requestAnimationFrame(loop);
+    }
+
+    function performBossAction(action) {
+      audio.play('click');
+      bossHp = Math.max(0, bossHp - 12);
+      sendNetworkEvent('LAST_STAR_ACTION', { action });
+      if (bossHp <= 0) {
+        recordGameSuccess('laststar', 250);
+      }
+    }
+
+    function syncLastStarAction(action) {
+      audio.play('hit');
+      bossHp = Math.max(0, bossHp - 12);
+    }
+
+    // =========================================================================
+    // 7. SARA'S BIRTHDAY FINALE TRIGGER
+    // =========================================================================
+    function triggerBirthdayFinale() {
+      audio.play('celestial');
+      showScreen('screen-finale');
+
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 150,
+          spread: 90,
+          origin: { y: 0.6 }
+        });
+      }
+
+      document.getElementById('btn-reveal-letter').onclick = () => {
+        audio.play('match');
+        const box = document.getElementById('secret-letter-box');
+        const content = document.getElementById('birthday-letter-content');
+        content.textContent = BIRTHDAY_LETTER;
+        box.classList.remove('hidden');
+
+        setInterval(() => {
+          if (typeof confetti === 'function') {
+            confetti({
+              particleCount: 40,
+              spread: 60,
+              origin: { x: Math.random(), y: 0.5 }
+            });
+          }
+        }, 3000);
+      };
+
+      document.getElementById('btn-return-lobby').onclick = () => {
+        audio.play('click');
+        showScreen('screen-lobby');
+      };
+    }
+  </script>
+</body>
+</html>
